@@ -33,11 +33,12 @@ jobs:
         with:
           version: 9
 
-      # 不启用 cache：setup-node 的 pnpm 缓存依赖 pnpm 已在 PATH 且 lockfile 版本匹配，
-      # 是这条流水线里最容易失败的环节。缓存只是加速，去掉更稳。
+      # 不启用任何缓存：setup-node@v4 默认会自动检测包管理器并执行
+      # `pnpm store path`，这一句是这条流水线最脆弱的地方。缓存只是加速，去掉更稳。
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+          package-manager-cache: false
 
       - name: 打印环境信息（排错用）
         run: |
