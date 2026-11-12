@@ -1,0 +1,92 @@
+{
+  "name": "cpp-video-learner",
+  "version": "2.0.0",
+  "description": "C++ 视频学习软件：50 节视频课 + 100 道练习题 + 内置代码台 + 笔记 + 进度追踪",
+  "main": "src/main/main.js",
+  "author": "DSH",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win --x64",
+    "build:win": "electron-builder --win --x64",
+    "build:mac": "electron-builder --mac",
+    "build:mac:arm64": "electron-builder --mac --arm64",
+    "build:mac:x64": "electron-builder --mac --x64",
+    "build:linux": "electron-builder --linux --x64"
+  },
+  "build": {
+    "appId": "com.dsh.cppvideo",
+    "productName": "CppVideoLearner",
+    "asar": false,
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "assets/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "C++ 视频学习",
+      "language": "2052",
+      "artifactName": "CppVideoLearner-Setup-${version}.exe",
+      "deleteAppDataOnUninstall": false,
+      "runAfterFinish": true
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["arm64", "x64"]
+        },
+        {
+          "target": "zip",
+          "arch": ["arm64"]
+        }
+      ],
+      "icon": "build/icon.png",
+      "category": "public.app-category.developer-tools",
+      "darkModeSupport": true,
+      "artifactName": "CppVideoLearner-${version}-${arch}.${ext}",
+      "identity": null,
+      "gatekeeperAssess": false,
+      "extendInfo": {
+        "NSHumanReadableCopyright": "C++ 视频学习 · 离线课件"
+      }
+    },
+    "dmg": {
+      "title": "C++ 视频学习 ${version}",
+      "contents": [
+        { "x": 140, "y": 200, "type": "file" },
+        { "x": 400, "y": 200, "type": "link", "path": "/Applications" }
+      ]
+    },
+    "linux": {
+      "target": ["AppImage"],
+      "category": "Development",
+      "icon": "build/icon-512.png",
+      "artifactName": "CppVideoLearner-${version}-${arch}.${ext}"
+    },
+    "compression": "normal"
+  },
+  "devDependencies": {
+    "electron": "33.2.0",
+    "electron-builder": "25.1.8"
+  }
+}

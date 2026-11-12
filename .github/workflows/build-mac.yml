@@ -1,0 +1,75 @@
+name: Build macOS
+
+# 在 GitHub 的 macOS 机器上构建 .dmg / .zip
+# 用法：Actions 页面 → Build macOS → Run workflow
+# 产物在 workflow 运行页底部的 Artifacts 里下载
+
+on:
+  workflow_dispatch:
+    inputs:
+      arch:
+        description: '要构建的架构'
+        required: true
+        default: 'both'
+        type: choice
+        options:
+          - both
+          - arm64
+          - x64
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-mac:
+    name: macOS build
+    runs-on: macos-latest
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: 安装依赖
+        run: pnpm install
+
+      # pnpm 默认会拦掉 electron 的 postinstall，需要手动下载二进制
+      - name: 下载 Electron（当前平台）
+        run: node node_modules/electron/install.js
+
+      - name: 构建（Apple Silicon + Intel）
+        if: ${{ github.event.inputs.arch == 'both' || github.event.inputs.arch == '' }}
+        run: pnpm exec electron-builder --mac --arm64 --x64
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+
+      - name: 构建（仅 Apple Silicon）
+        if: ${{ github.event.inputs.arch == 'arm64' }}
+        run: pnpm exec electron-builder --mac --arm64
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+
+      - name: 构建（仅 Intel）
+        if: ${{ github.event.inputs.arch == 'x64' }}
+        run: pnpm exec electron-builder --mac --x64
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+
+      - name: 列出产物
+        run: ls -lh release/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CppVideoLearner-macOS
+          path: |
+            release/*.dmg
+            release/*.zip
+          retention-days: 30

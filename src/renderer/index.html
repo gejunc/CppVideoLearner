@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>C++ 视频学习</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- 自绘标题栏（可拖拽） -->
+<header class="titlebar">
+  <div class="brand">
+    <span class="dot"></span>
+    <span class="brand-name">C++ 视频学习</span>
+    <span class="brand-sub">从语法基础到现代 C++</span>
+  </div>
+  <div class="tb-stats">
+    <span id="tb-progress">尚未开始</span>
+  </div>
+</header>
+
+<div class="app">
+  <!-- 左侧：章节与课时 -->
+  <aside class="sidebar">
+    <div class="course-card">
+      <div class="course-row">
+        <div>
+          <h1>C++ 系统课程</h1>
+          <p id="course-meta">加载中…</p>
+        </div>
+        <div class="ring-wrap">
+          <svg class="ring" viewBox="0 0 44 44">
+            <circle class="ring-bg" cx="22" cy="22" r="18"></circle>
+            <circle id="ring-fg" class="ring-fg" cx="22" cy="22" r="18"></circle>
+          </svg>
+          <span id="ring-pct">0%</span>
+        </div>
+      </div>
+      <div class="bar"><i id="bar-fill"></i></div>
+    </div>
+
+    <div class="search">
+      <svg viewBox="0 0 24 24" class="ico"><path d="M10 4a6 6 0 1 0 3.5 10.9l4.3 4.3 1.4-1.4-4.3-4.3A6 6 0 0 0 10 4zm0 2a4 4 0 1 1 0 8 4 4 0 0 1 0-8z"/></svg>
+      <input id="q" type="search" placeholder="搜索课时或知识点…" autocomplete="off" />
+    </div>
+
+    <nav id="chapters" class="chapters"></nav>
+
+    <footer class="side-foot">
+      <span id="foot-info">—</span>
+    </footer>
+  </aside>
+
+  <!-- 右侧：播放器 + 内容 -->
+  <main class="main">
+    <div class="player-wrap" id="player-wrap">
+      <video id="video" controls preload="metadata" playsinline></video>
+      <div class="subtitle" id="subtitle"></div>
+      <div class="empty" id="empty">
+        <div class="empty-inner">
+          <div class="empty-icon">
+            <svg viewBox="0 0 48 48"><path d="M16 12v24l18-12z"/></svg>
+          </div>
+          <h2>开始你的第一课</h2>
+          <p>左侧选择一个课时，视频、代码和笔记会一起就绪。</p>
+        </div>
+      </div>
+      <div class="resume-tip" id="resume-tip"></div>
+    </div>
+
+    <div class="lesson-bar">
+      <div class="lesson-info">
+        <div class="crumb" id="crumb">—</div>
+        <h2 id="lesson-title">—</h2>
+        <div class="meta-row">
+          <span id="lesson-dur" class="chip">—</span>
+          <span id="tags" class="tags"></span>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn ghost" id="btn-prev" title="上一课 (Alt+↑)">上一课</button>
+        <button class="btn ghost" id="btn-done" title="标记本课已学完">标记已学</button>
+        <button class="btn primary" id="btn-next" title="下一课 (Alt+↓)">下一课</button>
+      </div>
+    </div>
+
+    <div class="panels">
+      <section class="panel">
+        <header>
+          <div class="tabs">
+            <button class="tab active" data-tab="code">代码示例</button>
+            <button class="tab" data-tab="ex">练习题 <b id="ex-count"></b></button>
+          </div>
+          <span class="hint" id="code-hint">—</span>
+        </header>
+        <div class="panel-body" id="pane-code">
+          <p class="placeholder">选择课时后这里会列出视频里讲解的代码。</p>
+        </div>
+        <div class="panel-body hidden" id="pane-ex">
+          <p class="placeholder">这一课还没有配练习题。</p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <header>
+          <span class="ttl">我的笔记</span>
+          <span class="saved" id="note-state">自动保存</span>
+        </header>
+        <div class="panel-body note-body">
+          <textarea id="note" placeholder="记下这一课的关键点、疑问、或者想动手试试的地方…" spellcheck="false"></textarea>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<!-- 代码台：底部抽屉，写代码 → 本地 g++ 编译 → 立刻看到结果 -->
+<div class="drawer" id="drawer" aria-hidden="true">
+  <div class="drawer-head">
+    <span class="drawer-title">
+      <svg viewBox="0 0 24 24" class="ico"><path d="M8 6l-5 6 5 6V6zm8 0v12l5-6-5-6z"/></svg>
+      代码台
+    </span>
+    <span class="compiler-badge" id="compiler-badge">检测编译器中…</span>
+    <div class="drawer-actions">
+      <select id="std-select" title="C++ 标准">
+        <option value="c++17">C++17</option>
+        <option value="c++20" selected>C++20</option>
+      </select>
+      <button class="btn primary" id="btn-run" title="Ctrl+Enter">运行</button>
+      <button class="btn ghost" id="btn-reset-code" title="恢复成课时里的示例代码">重置</button>
+      <button class="btn ghost" id="btn-close-drawer" title="Esc">关闭</button>
+    </div>
+  </div>
+  <div class="drawer-body">
+    <div class="editor-pane">
+      <div class="gutter" id="gutter">1</div>
+      <div class="editor-stack">
+        <pre class="hl" id="hl" aria-hidden="true"></pre>
+        <textarea id="editor" spellcheck="false" autocomplete="off"
+                  autocapitalize="off" wrap="off"
+                  placeholder="// 在这里写 C++，Ctrl+Enter 编译运行"></textarea>
+      </div>
+    </div>
+    <div class="io-pane">
+      <div class="io-head">
+        <span>输出</span>
+        <span class="run-status" id="run-status"></span>
+      </div>
+      <pre class="io-out" id="run-output">按 Ctrl+Enter 运行，或点右上角「运行」。</pre>
+      <div class="io-head">
+        <span>标准输入（可选，一次性喂给 cin）</span>
+      </div>
+      <textarea class="io-in" id="run-stdin" spellcheck="false"
+                placeholder="需要读入数据时填在这里，例如：Tom 18 92.5"></textarea>
+    </div>
+  </div>
+</div>
+<div class="drawer-mask" id="drawer-mask"></div>
+
+<div class="toast" id="toast"></div>
+
+<script src="../../assets/data/course-data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
