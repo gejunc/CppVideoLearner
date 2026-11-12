@@ -71,7 +71,7 @@
       }
     },
     "dmg": {
-      "title": "C++ 视频学习 ${version}",
+      "title": "CppVideoLearner-${version}",
       "contents": [
         { "x": 140, "y": 200, "type": "file" },
         { "x": 400, "y": 200, "type": "link", "path": "/Applications" }
