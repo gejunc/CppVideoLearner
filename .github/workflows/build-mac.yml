@@ -55,21 +55,23 @@ jobs:
       - name: 下载 Electron（当前平台）
         run: node node_modules/electron/install.js
 
+      # --publish never：不指定的话 electron-builder 在 CI 里会以为要发布到
+      # GitHub Releases，然后因为缺 GH_TOKEN 直接失败。产物由下面 upload-artifact 收集。
       - name: 构建（Apple Silicon + Intel）
         if: ${{ github.event.inputs.arch == 'both' || github.event.inputs.arch == '' }}
-        run: pnpm exec electron-builder --mac --arm64 --x64
+        run: pnpm exec electron-builder --mac --arm64 --x64 --publish never
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
 
       - name: 构建（仅 Apple Silicon）
         if: ${{ github.event.inputs.arch == 'arm64' }}
-        run: pnpm exec electron-builder --mac --arm64
+        run: pnpm exec electron-builder --mac --arm64 --publish never
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
 
       - name: 构建（仅 Intel）
         if: ${{ github.event.inputs.arch == 'x64' }}
-        run: pnpm exec electron-builder --mac --x64
+        run: pnpm exec electron-builder --mac --x64 --publish never
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
 
