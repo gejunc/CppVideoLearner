@@ -33,13 +33,22 @@ jobs:
         with:
           version: 9
 
+      # 不启用 cache：setup-node 的 pnpm 缓存依赖 pnpm 已在 PATH 且 lockfile 版本匹配，
+      # 是这条流水线里最容易失败的环节。缓存只是加速，去掉更稳。
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: pnpm
+
+      - name: 打印环境信息（排错用）
+        run: |
+          echo "node: $(node -v)"
+          echo "pnpm: $(pnpm -v)"
+          echo "arch: $(uname -m)"
+          echo "cwd : $(pwd)"
+          ls -la
 
       - name: 安装依赖
-        run: pnpm install
+        run: pnpm install --no-frozen-lockfile
 
       # pnpm 默认会拦掉 electron 的 postinstall，需要手动下载二进制
       - name: 下载 Electron（当前平台）
