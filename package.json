@@ -59,7 +59,7 @@
       "icon": "build/icon.png",
       "category": "public.app-category.developer-tools",
       "darkModeSupport": true,
-      "artifactName": "CppVideoLearner-${version}-${arch}.${ext}",
+      "artifactName": "CppVideoLearner-${arch}.${ext}",
       "identity": null,
       "gatekeeperAssess": false,
       "extendInfo": {

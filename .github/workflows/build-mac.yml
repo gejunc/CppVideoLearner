@@ -26,6 +26,10 @@ jobs:
     runs-on: macos-latest
     timeout-minutes: 60
 
+    # 需要写权限才能把产物发布到 Releases
+    permissions:
+      contents: write
+
     steps:
       - uses: actions/checkout@v4
 
@@ -77,6 +81,28 @@ jobs:
 
       - name: 列出产物
         run: ls -lh release/
+
+      # 直接发布到 Releases，这样网站可以直接链接固定地址，
+      # 不必先把 200 多 MB 的 artifact 拉到本地再上传。
+      # tag 固定为 `mac-latest`，重复运行会覆盖同名附件，地址永远不变。
+      - name: 发布到 GitHub Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: mac-latest
+          name: macOS 最新构建
+          body: |
+            由 GitHub Actions 自动构建，代码提交 ${{ github.sha }}。
+
+            - Apple Silicon（M1/M2/M3/M4）：`CppVideoLearner-*-arm64.zip`
+            - Intel Mac：`CppVideoLearner-*-x64.zip`
+
+            下载后解压，把 App 拖进「应用程序」即可。
+            首次打开若被拦截：右键 App → 打开，或终端执行 `xattr -cr /Applications/CppVideoLearner.app`。
+          files: |
+            release/*.zip
+          fail_on_unmatched_files: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/upload-artifact@v4
         with:
